@@ -24,9 +24,10 @@ func StateReporter() {
 	}()
 }
 
+// FixedWithContextStateReporter definition.
 // No simple idiomatic fix presents itself. Either the goroutine created by StateReporter should have
 // its lifecycle tied to a context or structure, or the clients must ensure they only invoke StateReport
-// a limited number of times
+// a limited number of times.
 func FixedWithContextStateReporter(ctx context.Context) (context.Context, context.CancelFunc) {
 	reporterContext, cancel := context.WithCancel(ctx)
 	period := time.Duration(rand.Intn(1000) * 1000 * 1000)
@@ -35,7 +36,8 @@ func FixedWithContextStateReporter(ctx context.Context) (context.Context, contex
 			select {
 			case <-time.After(period):
 				LogMetrics()
-			case <-ctx.Done():
+			case <-reporterContext.Done():
+				return
 			}
 		}
 	}()
